@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoría de Tiendas PWA</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-12">
+
+  <!-- Header Superior / Perfil -->
+  <header class="bg-blue-700 text-white p-4 shadow-lg flex justify-between items-center">
+    <div>
+      <h1 class="text-xl font-bold" id="app-title">Auditoría de Tiendas</h1>
+      <p class="text-xs text-blue-200" id="user-info">Cargando usuario...</p>
+    </div>
+    <button onclick="logout()" class="bg-blue-800 text-xs px-3 py-1 rounded hover:bg-blue-900">Cerrar Sesión</button>
+  </header>
+
+  <!-- Navegación Módulos -->
+  <nav class="bg-white shadow border-b flex justify-around text-sm font-medium">
+    <button onclick="cambiarModulo('carga')" class="p-3 border-b-2 border-blue-600 text-blue-600 font-bold">1. Carga</button>
+    <button onclick="cambiarModulo('revision')" class="p-3 border-b-2 border-transparent hover:text-blue-600">2. Revisión</button>
+    <button onclick="cambiarModulo('analitica')" class="p-3 border-b-2 border-transparent hover:text-blue-600">3. Analítica</button>
+  </nav>
+
+  <!-- CONTENEDOR DE MÓDULOS -->
+  <main class="max-w-4xl mx-auto p-4">
+
+    <!-- MÓDULO 1: LOGIN Y SELECCIÓN DE ROL -->
+    <section id="sec-login" class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto my-8">
+      <h2 class="text-lg font-bold mb-4 text-center">Iniciar Sesión</h2>
+      <div class="mb-4">
+        <label class="block text-xs font-semibold mb-1">Correo Electrónico:</label>
+        <input type="email" id="login-email" placeholder="usuario@tienda.com" class="w-full border p-2 rounded text-sm">
+      </div>
+      <button onclick="iniciarSesion()" class="w-full bg-blue-600 text-white p-2 rounded font-bold hover:bg-blue-700">Ingresar al Sistema</button>
+    </section>
+
+    <!-- MÓDULO 2: CARGA DE ARCHIVOS -->
+    <section id="sec-carga" class="hidden space-y-4">
+      <div class="bg-white p-4 rounded-lg shadow">
+        <h2 class="font-bold text-md mb-2">Cargar Reporte (.xlsx / .xlsm)</h2>
+        <input type="file" id="input-excel" accept=".xlsx, .xlsm" class="block w-full text-sm text-gray-500 border p-2 rounded">
+        <button onclick="procesarExcel()" class="mt-3 bg-green-600 text-white px-4 py-2 rounded text-sm font-bold w-full">Procesar Archivo</button>
+      </div>
+    </section>
+
+    <!-- MÓDULO 3: REVISIÓN DE AUDITORÍA -->
+    <section id="sec-revision" class="hidden space-y-4">
+      <!-- Selector de Archivo -->
+      <div class="bg-white p-4 rounded-lg shadow space-y-2">
+        <label class="block text-xs font-bold">Tienda Asignada: <span id="lbl-tienda" class="text-blue-600"></span></label>
+        <label class="block text-xs font-bold">Selecciona el archivo a revisar:</label>
+        <select id="select-archivos" onchange="cargarArchivoSeleccionado()" class="w-full border p-2 rounded text-sm font-semibold">
+          <!-- Opciones dinámicas: SIN INICIAR, EN PROGRESO, FINALIZADO -->
+        </select>
+      </div>
+
+      <!-- Barra de Búsqueda y Botones de Control -->
+      <div class="bg-white p-4 rounded-lg shadow space-y-3">
+        <div class="flex gap-2">
+          <input type="text" id="input-busqueda" placeholder="Escanear o últimos 6 dígitos..." oninput="filtrarProductos()" class="flex-1 border p-2 rounded text-sm">
+          <button onclick="toggleCamara()" class="bg-gray-800 text-white px-3 py-2 rounded text-xs">📷 Cámara</button>
+        </div>
+        <div id="reader" class="hidden w-full border rounded"></div>
+
+        <!-- Botones de Acción (Resumen y Finalizar) -->
+        <div class="flex justify-end gap-2 border-t pt-2">
+          <button onclick="abrirModalResumen()" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">
+            📊 Resumen
+          </button>
+          <button onclick="finalizarAuditoria()" class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">
+            ☑ Finalizar Revisión
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de Productos -->
+      <div id="contenedor-productos" class="space-y-3">
+        <!-- Tarjetas dinámicas de productos -->
+      </div>
+    </section>
+
+    <!-- MÓDULO 4: ANALÍTICA Y TENDENCIAS -->
+    <section id="sec-analitica" class="hidden space-y-4">
+      <div class="bg-white p-4 rounded-lg shadow space-y-3">
+        <div class="flex justify-between items-center">
+          <div class="flex gap-2">
+            <button id="btn-tab-ind" onclick="cambiarTabAnalitica('individual')" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Tendencia Individual</button>
+            <button id="btn-tab-comp" onclick="cambiarTabAnalitica('comparativa')" class="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-bold">Comparativa de Tiendas</button>
+          </div>
+          <select id="select-periodo" onchange="actualizarGraficas()" class="border text-xs p-1 rounded">
+            <option value="hoy">Del Día (Hoy)</option>
+            <option value="mes">Último mes</option>
+            <option value="3meses" selected>Últimos 3 meses</option>
+            <option value="historico">Histórico Completo</option>
+          </select>
+        </div>
+
+        <div id="wrapper-select-tienda" class="pt-2">
+          <label class="block text-xs font-bold">Selecciona la tienda a analizar:</label>
+          <select id="select-tienda-analitica" onchange="actualizarGraficas()" class="w-full border p-1.5 rounded text-sm"></select>
+        </div>
+
+        <!-- Tarjetas KPI -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div class="bg-orange-50 border border-orange-200 p-3 rounded text-center">
+            <p class="text-xs text-orange-600 font-bold">NOTA CONSOLIDADA</p>
+            <p class="text-2xl font-black text-orange-700" id="kpi-nota">0%</p>
+          </div>
+          <div class="bg-blue-50 border border-blue-200 p-3 rounded text-center">
+            <p class="text-xs text-blue-600 font-bold">ARCHIVOS EVALUADOS</p>
+            <p class="text-2xl font-black text-blue-700" id="kpi-archivos">0</p>
+          </div>
+        </div>
+
+        <!-- Contenedor del Gráfico -->
+        <div class="pt-4">
+          <canvas id="chartAnalitica" class="w-full max-h-64"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: MOTIVOS DE RECHAZO (✕) -->
+  <div id="modal-motivos" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg p-5 w-full max-w-xs space-y-3 text-center shadow-xl">
+      <h3 class="font-bold text-sm text-gray-700">Selecciona el Motivo de Rechazo</h3>
+      <button onclick="confirmarRechazo('Rótulo')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">1. Rótulo</button>
+      <button onclick="confirmarRechazo('Precio')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">2. Precio</button>
+      <button onclick="confirmarRechazo('Faltante')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">3. Faltante</button>
+      <button onclick="confirmarRechazo('Fecha no corresponde')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">4. Fecha no corresponde</button>
+      <button onclick="cerrarModalMotivos()" class="w-full bg-gray-200 text-gray-700 p-2 rounded text-xs font-bold mt-2">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: AVANCE DE AUDITORÍA (DONA % NOTA) -->
+  <div id="modal-resumen" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg p-5 w-full max-w-md space-y-4 shadow-2xl relative">
+      <button onclick="cerrarModalResumen()" class="absolute top-3 right-3 text-gray-500 font-bold text-lg">✕</button>
+      <div class="text-center">
+        <h3 class="font-bold text-lg text-gray-800">Avance de Auditoría</h3>
+        <p class="text-xs text-gray-500" id="resumen-tienda-fecha">Automercado - 28/9/2026</p>
+        <p class="text-xs text-blue-600 font-semibold truncate" id="resumen-archivo-nombre"></p>
+      </div>
+
+      <!-- Gráfico de Dona -->
+      <div class="relative w-40 h-40 mx-auto">
+        <canvas id="chartDonaResumen"></canvas>
+      </div>
+
+      <!-- Métricas -->
+      <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
+        <div class="bg-green-50 p-2 rounded border border-green-200">
+          <p class="text-green-700 text-lg" id="cnt-correctos">0</p>
+          <p class="text-green-600 text-[10px]">CORRECTOS</p>
+        </div>
+        <div class="bg-red-50 p-2 rounded border border-red-200">
+          <p class="text-red-700 text-lg" id="cnt-incorrectos">0</p>
+          <p class="text-red-600 text-[10px]">INCORRECTOS</p>
+        </div>
+        <div class="bg-blue-50 p-2 rounded border border-blue-200">
+          <p class="text-blue-700 text-lg" id="cnt-escaneados">0</p>
+          <p class="text-blue-600 text-[10px]">ESCANEADOS</p>
+        </div>
+      </div>
+
+      <!-- Desglose de Incorrectos -->
+      <div class="border-t pt-2 text-xs">
+        <p class="font-bold text-gray-600 mb-1 text-center">DESGLOSE DE INCORRECTOS</p>
+        <div class="grid grid-cols-4 gap-1 text-center text-[10px]">
+          <div><p class="font-bold" id="des-rotulo">0</p><p class="text-gray-500">Rótulo</p></div>
+          <div><p class="font-bold" id="des-precio">0</p><p class="text-gray-500">Precio</p></div>
+          <div><p class="font-bold" id="des-faltante">0</p><p class="text-gray-500">Faltante</p></div>
+          <div><p class="font-bold" id="des-fecha">0</p><p class="text-gray-500">Fecha</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/modulo-carga.js"></script>
+  <script src="js/modulo-revision.js"></script>
+  <script src="js/modulo-analitica.js"></script>
+</body>
+</html>
