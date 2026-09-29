@@ -51,8 +51,12 @@ function crearTarjetaProducto(prod, index) {
   card.innerHTML = `
     <div>
       <h4 class="font-bold text-xs text-gray-800">${prod.descripcion}</h4>
-      <p class="text-[10px] text-gray-500">Cód: ${prod.codigo} | Venc: ${prod.vencimiento}</p>
-      <p class="text-xs font-black text-red-600">₡${prod.precioOferta} <span class="line-through text-gray-400 font-normal text-[10px]">₡${prod.precioNormal}</span></p>
+      <p class="text-[10px] text-gray-500">Cód: ${prod.codigo}</p>
+      <div class="flex items-center gap-2 mt-1">
+        <span class="text-xs font-black text-red-600">Oferta: ₡${prod.precioOferta}</span>
+        <span class="line-through text-gray-400 text-[10px]">Norm: ₡${prod.precioNormal}</span>
+        <span class="bg-green-100 text-green-800 text-[9px] px-1.5 py-0.5 rounded font-bold">Ahorro: ₡${prod.ahorro}</span>
+      </div>
     </div>
     <div class="flex gap-1">
       <button onclick="marcarAprobado(${index})" class="bg-green-100 text-green-700 p-2 rounded-full font-bold hover:bg-green-200">✓</button>

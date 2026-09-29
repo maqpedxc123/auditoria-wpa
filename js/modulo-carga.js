@@ -1,4 +1,3 @@
-// Convertir letras de columna Excel (A, B, C...) a índices numéricos (0, 1, 2...)
 function letraAIndice(letra) {
   if (!letra) return -1;
   letra = letra.trim().toUpperCase();
@@ -6,31 +5,30 @@ function letraAIndice(letra) {
   for (let i = 0; i < letra.length; i++) {
     indice = indice * 26 + (letra.charCodeAt(i) - 64);
   }
-  return indice - 1; // Base cero para arreglos JavaScript
+  return indice - 1;
 }
 
-function procesarExcelConMapeo() {
+function procesarExcelAuditoria() {
   const input = document.getElementById('input-excel');
-  const colCodigoLetra = document.getElementById('col-codigo').value;
-  const colNombreLetra = document.getElementById('col-nombre').value;
-  const colExistenciaLetra = document.getElementById('col-existencia').value;
+  const colCod = document.getElementById('col-codigo').value;
+  const colNom = document.getElementById('col-nombre').value;
+  const colPNormal = document.getElementById('col-precio-normal').value;
+  const colPOferta = document.getElementById('col-precio-oferta').value;
+  const colAhorro = document.getElementById('col-ahorro').value;
 
-  // Validaciones de entradas
   if (!input.files || !input.files.length) {
-    return alert('Por favor selecciona un archivo Excel (.xlsx o .xlsm).');
+    return alert('Selecciona un archivo Excel primero.');
   }
 
-  if (!colCodigoLetra || !colNombreLetra || !colExistenciaLetra) {
-    return alert('Debes indicar las 3 letras de columna (Código, Nombre y Existencia).');
+  if (!colCod || !colNom || !colPNormal || !colPOferta) {
+    return alert('Debes indicar al menos las columnas de Código, Nombre, Precio Normal y Precio Oferta.');
   }
 
-  const idxCodigo = letraAIndice(colCodigoLetra);
-  const idxNombre = letraAIndice(colNombreLetra);
-  const idxExistencia = letraAIndice(colExistenciaLetra);
-
-  if (idxCodigo < 0 || idxNombre < 0 || idxExistencia < 0) {
-    return alert('Asegúrate de ingresar letras válidas de columna (ejemplo: A, B, C).');
-  }
+  const idxCod = letraAIndice(colCod);
+  const idxNom = letraAIndice(colNom);
+  const idxPNormal = letraAIndice(colPNormal);
+  const idxPOferta = letraAIndice(colPOferta);
+  const idxAhorro = letraAIndice(colAhorro);
 
   const file = input.files[0];
   const reader = new FileReader();
@@ -41,33 +39,36 @@ function procesarExcelConMapeo() {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-
-      // Convertir la hoja a una matriz bidimensional [fila][columna]
       const filas = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      if (filas.length < 2) {
-        return alert('El archivo seleccionado está vacío o no contiene filas de datos.');
-      }
+      if (filas.length < 2) return alert('El archivo no contiene filas de datos.');
 
-      const productosExtraidos = [];
+      const productos = [];
 
-      // Omitimos la fila 0 (encabezados) y procesamos cada fila de datos
       for (let i = 1; i < filas.length; i++) {
         const fila = filas[i];
         if (!fila || fila.length === 0) continue;
 
-        const codigoVal = fila[idxCodigo] !== undefined ? String(fila[idxCodigo]).trim() : '';
-        const nombreVal = fila[idxNombre] !== undefined ? String(fila[idxNombre]).trim() : '';
-        const existenciaVal = fila[idxExistencia] !== undefined ? parseFloat(fila[idxExistencia]) || 0 : 0;
+        const codigo = fila[idxCod] !== undefined ? String(fila[idxCod]).trim() : '';
+        const descripcion = fila[idxNom] !== undefined ? String(fila[idxNom]).trim() : '';
+        const precioNormal = fila[idxPNormal] !== undefined ? parseFloat(fila[idxPNormal]) || 0 : 0;
+        const precioOferta = fila[idxPOferta] !== undefined ? parseFloat(fila[idxPOferta]) || 0 : 0;
+        
+        // Si no se indica columna de ahorro, lo calcula automáticamente
+        let ahorro = 0;
+        if (idxAhorro >= 0 && fila[idxAhorro] !== undefined) {
+          ahorro = parseFloat(fila[idxAhorro]) || 0;
+        } else {
+          ahorro = Math.max(0, precioNormal - precioOferta);
+        }
 
-        // Extraer únicamente filas que contengan al menos código o nombre
-        if (codigoVal || nombreVal) {
-          productosExtraidos.push({
-            codigo: codigoVal || 'SIN_CODIGO',
-            descripcion: nombreVal || 'Producto sin descripción',
-            existencia: existenciaVal,
-            precioNormal: 0,
-            precioOferta: 0,
+        if (codigo || descripcion) {
+          productos.push({
+            codigo: codigo || 'SIN_CODIGO',
+            descripcion: descripcion || 'Producto sin descripción',
+            precioNormal,
+            precioOferta,
+            ahorro,
             vencimiento: 'N/A',
             estado: 'Pendiente',
             motivoRechazo: ''
@@ -75,35 +76,28 @@ function procesarExcelConMapeo() {
         }
       }
 
-      if (productosExtraidos.length === 0) {
-        return alert('No se encontraron datos válidos en las columnas indicadas.');
-      }
-
-      // Guardar el reporte procesado en la estructura global
-      const tiendaAsignada = (estadoGlobal.usuarioActual && estadoGlobal.usuarioActual.tienda !== 'Todas') 
-        ? estadoGlobal.usuarioActual.tienda 
+      const tiendaUser = (estadoGlobal.usuarioActual && estadoGlobal.usuarioActual.tienda !== 'Todas')
+        ? estadoGlobal.usuarioActual.tienda
         : 'Automercado';
 
       const nuevoReporte = {
         nombre: file.name,
-        tienda: tiendaAsignada,
+        tienda: tiendaUser,
         fechaCarga: new Date().toLocaleDateString('es-CR'),
         estado: 'SIN INICIAR',
-        productos: productosExtraidos
+        productos
       };
 
       estadoGlobal.archivosCargados.push(nuevoReporte);
+      alert(`¡Éxito! Archivo "${file.name}" cargado con ${productos.length} productos de oferta.`);
 
-      alert(`¡Éxito! Se procesó el archivo "${file.name}" cargando ${productosExtraidos.length} productos con sus existencias.`);
-
-      // Limpiar formulario y redireccionar al Módulo 2 (Revisión)
       input.value = '';
       renderizarSelectArchivos();
       cambiarModulo('revision');
 
     } catch (err) {
       console.error(err);
-      alert('Ocurrió un error al leer el archivo Excel. Verifica que el formato sea correcto.');
+      alert('Error al procesar el archivo Excel.');
     }
   };
 
