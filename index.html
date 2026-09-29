@@ -43,12 +43,12 @@
       <button onclick="iniciarSesion()" class="w-full bg-blue-600 text-white p-2 rounded font-bold hover:bg-blue-700">Ingresar al Sistema</button>
     </section>
 
-    <!-- MÓDULO 1: CARGA DE REPORTE DE AUDITORÍA / OFERTAS -->
+    <!-- MÓDULO 1: CARGA DE REPORTE DE OFERTAS (AUDITORES) -->
     <section id="sec-carga" class="hidden space-y-4">
       <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600 space-y-4">
         <div>
-          <h2 class="font-bold text-base text-gray-800">📄 Cargar Reporte de Auditoría / Ofertas</h2>
-          <p class="text-xs text-gray-500">Sube el archivo Excel de la revisión e indica las letras de las columnas correspondientes.</p>
+          <h2 class="font-bold text-base text-gray-800">📄 Cargar Reporte de Ofertas Diarias</h2>
+          <p class="text-xs text-gray-500">Sube el reporte de la promoción para cruzarlo con las existencias de la tienda.</p>
         </div>
 
         <div>
@@ -56,38 +56,39 @@
           <input type="file" id="input-excel" accept=".xlsx, .xlsm" class="block w-full text-xs text-gray-500 border p-2 rounded bg-gray-50">
         </div>
 
-        <!-- Mapeo de Columnas para Auditoría -->
-        <div class="bg-gray-50 p-3 rounded border space-y-3">
-          <p class="text-xs font-bold text-gray-700">Mapeo de Columnas (Ingresa la letra de cada columna):</p>
+        <div class="bg-gray-50 p-3 rounded border space-y-2">
+          <p class="text-xs font-bold text-gray-700">Letra de Columnas en el Excel:</p>
           <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
             <div>
-              <label class="block text-[10px] font-bold text-gray-600 uppercase">Código:</label>
-              <input type="text" id="col-codigo" placeholder="Ej. A" maxlength="2" class="w-full border p-1.5 rounded text-center text-xs font-bold uppercase bg-white">
+              <label class="block text-[10px] font-bold text-gray-600">Código:</label>
+              <input type="text" id="col-codigo" placeholder="Ej. A" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-600 uppercase">Nombre:</label>
-              <input type="text" id="col-nombre" placeholder="Ej. B" maxlength="2" class="w-full border p-1.5 rounded text-center text-xs font-bold uppercase bg-white">
+              <label class="block text-[10px] font-bold text-gray-600">Nombre:</label>
+              <input type="text" id="col-nombre" placeholder="Ej. B" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-600 uppercase">Precio Normal:</label>
-              <input type="text" id="col-precio-normal" placeholder="Ej. C" maxlength="2" class="w-full border p-1.5 rounded text-center text-xs font-bold uppercase bg-white">
+              <label class="block text-[10px] font-bold text-gray-600">P. Normal:</label>
+              <input type="text" id="col-precio-normal" placeholder="Ej. C" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-600 uppercase">Precio Oferta:</label>
-              <input type="text" id="col-precio-oferta" placeholder="Ej. D" maxlength="2" class="w-full border p-1.5 rounded text-center text-xs font-bold uppercase bg-white">
+              <label class="block text-[10px] font-bold text-gray-600">P. Oferta:</label>
+              <input type="text" id="col-precio-oferta" placeholder="Ej. D" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
             </div>
             <div>
-              <label class="block text-[10px] font-bold text-gray-600 uppercase">Ahorro:</label>
-              <input type="text" id="col-ahorro" placeholder="Ej. E" maxlength="2" class="w-full border p-1.5 rounded text-center text-xs font-bold uppercase bg-white">
+              <label class="block text-[10px] font-bold text-gray-600">Ahorro:</label>
+              <input type="text" id="col-ahorro" placeholder="Ej. E" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
             </div>
           </div>
         </div>
 
         <button onclick="procesarExcelAuditoria()" class="w-full bg-blue-600 text-white py-2.5 rounded text-xs font-bold hover:bg-blue-700 shadow">
-          📥 Procesar y Habilitar para Revisión
+          📥 Procesar y Cruzar con Inventario
         </button>
       </div>
     </section>
+
+
 
     <!-- MÓDULO 2: REVISIÓN -->
     <section id="sec-revision" class="hidden space-y-4">
@@ -151,47 +152,35 @@
       </div>
     </section>
 
-    <!-- MÓDULO 4: ADMINISTRACIÓN (NUEVO) -->
-    <section id="sec-admin" class="hidden space-y-6">
-      
-      <!-- Panel 1: Registro de Tiendas -->
-      <div class="bg-white p-4 rounded-lg shadow space-y-3 border-l-4 border-purple-600">
-        <h3 class="font-bold text-sm text-gray-800">🏪 Registro de Nuevas Tiendas</h3>
-        <div class="flex gap-2">
-          <input type="text" id="input-nueva-tienda" placeholder="Nombre de la tienda (ej. Sabalito)" class="flex-1 border p-2 rounded text-sm">
-          <button onclick="agregarTienda()" class="bg-purple-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-purple-700">+ Guardar Tienda</button>
+    <!-- Carga de Inventario Maestro (Solo Visible en Admin) -->
+      <div class="bg-white p-4 rounded-lg shadow space-y-3 border-l-4 border-green-600">
+        <div>
+          <h3 class="font-bold text-sm text-gray-800">📦 Cargar / Actualizar Inventario Maestro</h3>
+          <p class="text-[11px] text-gray-500">Sube la base general de existencias para habilitar las auditorías diarias.</p>
         </div>
-        <div id="lista-tiendas-admin" class="space-y-1.5 pt-2">
-          <!-- Lista dinámica de tiendas -->
-        </div>
-      </div>
 
-      <!-- Panel 2: Registro de Usuarios/Auditores -->
-      <div class="bg-white p-4 rounded-lg shadow space-y-3 border-l-4 border-blue-600">
-        <h3 class="font-bold text-sm text-gray-800">👤 Registro de Usuarios y Asignación de Tienda</h3>
-        <div class="space-y-2">
+        <div>
+          <input type="file" id="input-excel-maestro" accept=".xlsx, .xlsm" class="block w-full text-xs text-gray-500 border p-2 rounded bg-gray-50">
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-gray-50 p-2 rounded border">
           <div>
-            <label class="block text-[10px] font-bold text-gray-500">Correo del Auditor:</label>
-            <input type="email" id="input-usuario-email" placeholder="auditor@tienda.com" class="w-full border p-2 rounded text-sm">
+            <label class="block text-[10px] font-bold text-gray-600">Col. Código:</label>
+            <input type="text" id="col-maestro-codigo" placeholder="A" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
           </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="block text-[10px] font-bold text-gray-500">Rol:</label>
-              <select id="select-usuario-rol" class="w-full border p-2 rounded text-xs">
-                <option value="Auditor">Auditor</option>
-                <option value="Master">Master / Admin</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-[10px] font-bold text-gray-500">Tienda Asignada:</label>
-              <select id="select-usuario-tienda" class="w-full border p-2 rounded text-xs"></select>
-            </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600">Col. Nombre:</label>
+            <input type="text" id="col-maestro-nombre" placeholder="B" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
           </div>
-          <button onclick="agregarUsuario()" class="w-full bg-blue-600 text-white p-2 rounded text-xs font-bold hover:bg-blue-700 mt-2">+ Registrar Usuario</button>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-600">Col. Existencia:</label>
+            <input type="text" id="col-maestro-existencia" placeholder="C" maxlength="2" class="w-full border p-1 rounded text-center text-xs font-bold uppercase bg-white">
+          </div>
         </div>
-        <div id="lista-usuarios-admin" class="space-y-1.5 pt-2">
-          <!-- Lista dinámica de usuarios -->
-        </div>
+
+        <button onclick="procesarExcelMaestro()" class="w-full bg-green-600 text-white p-2 rounded text-xs font-bold hover:bg-green-700">
+          💾 Guardar Base de Inventario Maestro
+        </button>
       </div>
 
     </section>
