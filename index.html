@@ -13,7 +13,6 @@
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-12">
 
-  <!-- Header Superior / Perfil -->
   <header class="bg-blue-700 text-white p-4 shadow-lg flex justify-between items-center">
     <div>
       <h1 class="text-xl font-bold" id="app-title">Auditoría de Tiendas</h1>
@@ -23,16 +22,16 @@
   </header>
 
   <!-- Navegación Módulos -->
-  <nav class="bg-white shadow border-b flex justify-around text-sm font-medium">
+  <nav class="bg-white shadow border-b flex justify-around text-xs md:text-sm font-medium">
     <button onclick="cambiarModulo('carga')" class="p-3 border-b-2 border-blue-600 text-blue-600 font-bold">1. Carga</button>
     <button onclick="cambiarModulo('revision')" class="p-3 border-b-2 border-transparent hover:text-blue-600">2. Revisión</button>
     <button onclick="cambiarModulo('analitica')" class="p-3 border-b-2 border-transparent hover:text-blue-600">3. Analítica</button>
+    <button id="btn-nav-admin" onclick="cambiarModulo('admin')" class="p-3 border-b-2 border-transparent hover:text-blue-600 text-purple-600 font-bold hidden">4. Admin</button>
   </nav>
 
-  <!-- CONTENEDOR DE MÓDULOS -->
   <main class="max-w-4xl mx-auto p-4">
 
-    <!-- MÓDULO 1: LOGIN Y SELECCIÓN DE ROL -->
+    <!-- LOGIN -->
     <section id="sec-login" class="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto my-8">
       <h2 class="text-lg font-bold mb-4 text-center">Iniciar Sesión</h2>
       <div class="mb-4">
@@ -42,7 +41,7 @@
       <button onclick="iniciarSesion()" class="w-full bg-blue-600 text-white p-2 rounded font-bold hover:bg-blue-700">Ingresar al Sistema</button>
     </section>
 
-    <!-- MÓDULO 2: CARGA DE ARCHIVOS -->
+    <!-- MÓDULO 1: CARGA -->
     <section id="sec-carga" class="hidden space-y-4">
       <div class="bg-white p-4 rounded-lg shadow">
         <h2 class="font-bold text-md mb-2">Cargar Reporte (.xlsx / .xlsm)</h2>
@@ -51,18 +50,14 @@
       </div>
     </section>
 
-    <!-- MÓDULO 3: REVISIÓN DE AUDITORÍA -->
+    <!-- MÓDULO 2: REVISIÓN -->
     <section id="sec-revision" class="hidden space-y-4">
-      <!-- Selector de Archivo -->
       <div class="bg-white p-4 rounded-lg shadow space-y-2">
         <label class="block text-xs font-bold">Tienda Asignada: <span id="lbl-tienda" class="text-blue-600"></span></label>
         <label class="block text-xs font-bold">Selecciona el archivo a revisar:</label>
-        <select id="select-archivos" onchange="cargarArchivoSeleccionado()" class="w-full border p-2 rounded text-sm font-semibold">
-          <!-- Opciones dinámicas: SIN INICIAR, EN PROGRESO, FINALIZADO -->
-        </select>
+        <select id="select-archivos" onchange="cargarArchivoSeleccionado()" class="w-full border p-2 rounded text-sm font-semibold"></select>
       </div>
 
-      <!-- Barra de Búsqueda y Botones de Control -->
       <div class="bg-white p-4 rounded-lg shadow space-y-3">
         <div class="flex gap-2">
           <input type="text" id="input-busqueda" placeholder="Escanear o últimos 6 dígitos..." oninput="filtrarProductos()" class="flex-1 border p-2 rounded text-sm">
@@ -70,24 +65,16 @@
         </div>
         <div id="reader" class="hidden w-full border rounded"></div>
 
-        <!-- Botones de Acción (Resumen y Finalizar) -->
         <div class="flex justify-end gap-2 border-t pt-2">
-          <button onclick="abrirModalResumen()" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">
-            📊 Resumen
-          </button>
-          <button onclick="finalizarAuditoria()" class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">
-            ☑ Finalizar Revisión
-          </button>
+          <button onclick="abrirModalResumen()" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">📊 Resumen</button>
+          <button onclick="finalizarAuditoria()" class="bg-green-600 text-white px-3 py-1.5 rounded text-xs font-bold flex items-center gap-1">☑ Finalizar Revisión</button>
         </div>
       </div>
 
-      <!-- Lista de Productos -->
-      <div id="contenedor-productos" class="space-y-3">
-        <!-- Tarjetas dinámicas de productos -->
-      </div>
+      <div id="contenedor-productos" class="space-y-3"></div>
     </section>
 
-    <!-- MÓDULO 4: ANALÍTICA Y TENDENCIAS -->
+    <!-- MÓDULO 3: ANALÍTICA -->
     <section id="sec-analitica" class="hidden space-y-4">
       <div class="bg-white p-4 rounded-lg shadow space-y-3">
         <div class="flex justify-between items-center">
@@ -108,7 +95,6 @@
           <select id="select-tienda-analitica" onchange="actualizarGraficas()" class="w-full border p-1.5 rounded text-sm"></select>
         </div>
 
-        <!-- Tarjetas KPI -->
         <div class="grid grid-cols-2 gap-3 pt-2">
           <div class="bg-orange-50 border border-orange-200 p-3 rounded text-center">
             <p class="text-xs text-orange-600 font-bold">NOTA CONSOLIDADA</p>
@@ -120,74 +106,63 @@
           </div>
         </div>
 
-        <!-- Contenedor del Gráfico -->
         <div class="pt-4">
           <canvas id="chartAnalitica" class="w-full max-h-64"></canvas>
         </div>
       </div>
     </section>
 
+    <!-- MÓDULO 4: ADMINISTRACIÓN (NUEVO) -->
+    <section id="sec-admin" class="hidden space-y-6">
+      
+      <!-- Panel 1: Registro de Tiendas -->
+      <div class="bg-white p-4 rounded-lg shadow space-y-3 border-l-4 border-purple-600">
+        <h3 class="font-bold text-sm text-gray-800">🏪 Registro de Nuevas Tiendas</h3>
+        <div class="flex gap-2">
+          <input type="text" id="input-nueva-tienda" placeholder="Nombre de la tienda (ej. Sabalito)" class="flex-1 border p-2 rounded text-sm">
+          <button onclick="agregarTienda()" class="bg-purple-600 text-white px-4 py-2 rounded text-xs font-bold hover:bg-purple-700">+ Guardar Tienda</button>
+        </div>
+        <div id="lista-tiendas-admin" class="space-y-1.5 pt-2">
+          <!-- Lista dinámica de tiendas -->
+        </div>
+      </div>
+
+      <!-- Panel 2: Registro de Usuarios/Auditores -->
+      <div class="bg-white p-4 rounded-lg shadow space-y-3 border-l-4 border-blue-600">
+        <h3 class="font-bold text-sm text-gray-800">👤 Registro de Usuarios y Asignación de Tienda</h3>
+        <div class="space-y-2">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500">Correo del Auditor:</label>
+            <input type="email" id="input-usuario-email" placeholder="auditor@tienda.com" class="w-full border p-2 rounded text-sm">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500">Rol:</label>
+              <select id="select-usuario-rol" class="w-full border p-2 rounded text-xs">
+                <option value="Auditor">Auditor</option>
+                <option value="Master">Master / Admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-gray-500">Tienda Asignada:</label>
+              <select id="select-usuario-tienda" class="w-full border p-2 rounded text-xs"></select>
+            </div>
+          </div>
+          <button onclick="agregarUsuario()" class="w-full bg-blue-600 text-white p-2 rounded text-xs font-bold hover:bg-blue-700 mt-2">+ Registrar Usuario</button>
+        </div>
+        <div id="lista-usuarios-admin" class="space-y-1.5 pt-2">
+          <!-- Lista dinámica de usuarios -->
+        </div>
+      </div>
+
+    </section>
+
   </main>
-
-  <!-- MODAL: MOTIVOS DE RECHAZO (✕) -->
-  <div id="modal-motivos" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg p-5 w-full max-w-xs space-y-3 text-center shadow-xl">
-      <h3 class="font-bold text-sm text-gray-700">Selecciona el Motivo de Rechazo</h3>
-      <button onclick="confirmarRechazo('Rótulo')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">1. Rótulo</button>
-      <button onclick="confirmarRechazo('Precio')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">2. Precio</button>
-      <button onclick="confirmarRechazo('Faltante')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">3. Faltante</button>
-      <button onclick="confirmarRechazo('Fecha no corresponde')" class="w-full bg-red-50 text-red-700 border border-red-200 p-2 rounded text-xs font-bold hover:bg-red-100">4. Fecha no corresponde</button>
-      <button onclick="cerrarModalMotivos()" class="w-full bg-gray-200 text-gray-700 p-2 rounded text-xs font-bold mt-2">Cancelar</button>
-    </div>
-  </div>
-
-  <!-- MODAL: AVANCE DE AUDITORÍA (DONA % NOTA) -->
-  <div id="modal-resumen" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-lg p-5 w-full max-w-md space-y-4 shadow-2xl relative">
-      <button onclick="cerrarModalResumen()" class="absolute top-3 right-3 text-gray-500 font-bold text-lg">✕</button>
-      <div class="text-center">
-        <h3 class="font-bold text-lg text-gray-800">Avance de Auditoría</h3>
-        <p class="text-xs text-gray-500" id="resumen-tienda-fecha">Automercado - 28/9/2026</p>
-        <p class="text-xs text-blue-600 font-semibold truncate" id="resumen-archivo-nombre"></p>
-      </div>
-
-      <!-- Gráfico de Dona -->
-      <div class="relative w-40 h-40 mx-auto">
-        <canvas id="chartDonaResumen"></canvas>
-      </div>
-
-      <!-- Métricas -->
-      <div class="grid grid-cols-3 gap-2 text-center text-xs font-bold">
-        <div class="bg-green-50 p-2 rounded border border-green-200">
-          <p class="text-green-700 text-lg" id="cnt-correctos">0</p>
-          <p class="text-green-600 text-[10px]">CORRECTOS</p>
-        </div>
-        <div class="bg-red-50 p-2 rounded border border-red-200">
-          <p class="text-red-700 text-lg" id="cnt-incorrectos">0</p>
-          <p class="text-red-600 text-[10px]">INCORRECTOS</p>
-        </div>
-        <div class="bg-blue-50 p-2 rounded border border-blue-200">
-          <p class="text-blue-700 text-lg" id="cnt-escaneados">0</p>
-          <p class="text-blue-600 text-[10px]">ESCANEADOS</p>
-        </div>
-      </div>
-
-      <!-- Desglose de Incorrectos -->
-      <div class="border-t pt-2 text-xs">
-        <p class="font-bold text-gray-600 mb-1 text-center">DESGLOSE DE INCORRECTOS</p>
-        <div class="grid grid-cols-4 gap-1 text-center text-[10px]">
-          <div><p class="font-bold" id="des-rotulo">0</p><p class="text-gray-500">Rótulo</p></div>
-          <div><p class="font-bold" id="des-precio">0</p><p class="text-gray-500">Precio</p></div>
-          <div><p class="font-bold" id="des-faltante">0</p><p class="text-gray-500">Faltante</p></div>
-          <div><p class="font-bold" id="des-fecha">0</p><p class="text-gray-500">Fecha</p></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <script src="js/app.js"></script>
   <script src="js/modulo-carga.js"></script>
   <script src="js/modulo-revision.js"></script>
   <script src="js/modulo-analitica.js"></script>
+  <script src="js/modulo-admin.js"></script>
 </body>
 </html>

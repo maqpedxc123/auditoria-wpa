@@ -1,4 +1,4 @@
-const CACHE_NAME = 'auditoria-v1';
+const CACHE_NAME = 'auditoria-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -7,9 +7,7 @@ const ASSETS = [
   './js/modulo-carga.js',
   './js/modulo-revision.js',
   './js/modulo-analitica.js',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js',
-  'https://unpkg.com/html5-qrcode'
+  './js/modulo-admin.js'
 ];
 
 self.addEventListener('install', (e) => {
