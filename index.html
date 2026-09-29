@@ -29,6 +29,15 @@
     <button id="btn-nav-admin" onclick="cambiarModulo('admin')" class="p-3 border-b-2 border-transparent hover:text-blue-600 text-purple-600 font-bold hidden">4. Admin</button>
   </nav>
 
+<!-- Navegación Módulos (Oculta por defecto antes de iniciar sesión) -->
+  <nav id="app-nav" class="hidden bg-white shadow border-b flex justify-around text-xs md:text-sm font-medium">
+    <button onclick="cambiarModulo('carga')" class="p-3 border-b-2 border-blue-600 text-blue-600 font-bold">1. Carga</button>
+    <button onclick="cambiarModulo('revision')" class="p-3 border-b-2 border-transparent hover:text-blue-600">2. Revisión</button>
+    <button onclick="cambiarModulo('analitica')" class="p-3 border-b-2 border-transparent hover:text-blue-600">3. Analítica</button>
+    <button id="btn-nav-admin" onclick="cambiarModulo('admin')" class="p-3 border-b-2 border-transparent hover:text-blue-600 text-purple-600 font-bold hidden">4. Admin</button>
+  </nav>
+
+
   <main class="max-w-4xl mx-auto p-4">
 
     <!-- LOGIN -->
